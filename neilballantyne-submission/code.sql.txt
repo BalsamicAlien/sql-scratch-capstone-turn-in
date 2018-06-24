@@ -1,0 +1,201 @@
+/*
+--QUESTION1
+SELECT * 
+FROM survey
+LIMIT 10;
+*/
+
+/*
+--QUESTION2
+
+SELECT question,
+ COUNT(DISTINCT user_id) AS 'number_answers'
+ FROM survey
+ GROUP BY question
+;
+*/
+
+--QUESTION 3 IN GOOGLE DOCS
+
+/*
+--QUESTION 4
+-- switch FROM to see columns
+SELECT * 
+FROM purchase
+LIMIT 5;
+*/
+
+/*
+
+--QUESTION 5
+SELECT 
+DISTINCT q.user_id,
+h.user_id IS NOT NULL AS 'is_home_try_on',
+h.number_of_pairs,
+p.user_id IS NOT NULL AS 'is_purchase'
+FROM 
+quiz q
+LEFT JOIN home_try_on h
+ON q.user_id = h.user_id
+LEFT JOIN purchase p
+ON p.user_id = q.user_id
+LIMIT 10
+;
+*/
+
+/*
+--QUESTION 6 part 1 (funnel)
+WITH funnel AS
+ (SELECT DISTINCT q.user_id,
+   h.user_id IS NOT NULL AS 'is_home_try_on',
+   h.number_of_pairs,
+   p.user_id IS NOT NULL AS 'is_purchase'
+FROM quiz q
+LEFT JOIN home_try_on h
+   ON q.user_id = h.user_id
+LEFT JOIN purchase p
+   ON p.user_id = q.user_id
+)
+
+SELECT 
+COUNT(user_id) As 'num_quiz',
+SUM(is_purchase) AS 'num_purchase',
+100 * (1.0 * SUM(is_purchase) /
+COUNT(user_id)) AS 'conversion_%'
+FROM funnel
+;
+*/
+/*
+--QUESTION 6 part 2 (conversions)
+WITH funnel AS
+ (SELECT DISTINCT q.user_id,
+   h.user_id IS NOT NULL AS 'is_home_try_on',
+   h.number_of_pairs,
+   p.user_id IS NOT NULL AS 'is_purchase'
+FROM quiz q
+LEFT JOIN home_try_on h
+   ON q.user_id = h.user_id
+LEFT JOIN purchase p
+   ON p.user_id = q.user_id
+)
+SELECT 
+COUNT(user_id) AS 'num_quiz',
+SUM(is_home_try_on) AS 'num_home_try_on',
+SUM(is_purchase) AS 'num_purchase',
+ROUND (100 * (1.0 * SUM(is_home_try_on) /
+COUNT(user_id)),1) AS 'quiz_to_try_on',
+ROUND (100 * (1.0 * SUM(is_purchase) /
+SUM(is_home_try_on)),1) AS 'try_on_to_purchase',
+ROUND (100 * (1.0 * SUM(is_purchase) / COUNT(user_id)),1) AS 'overall_conversion'
+FROM funnel
+;
+*/
+
+/*
+
+--QUESTION 6 part 3 (variants)
+WITH funnel AS
+ (SELECT DISTINCT q.user_id,
+   h.user_id IS NOT NULL AS 'is_home_try_on',
+   h.number_of_pairs,
+   p.user_id IS NOT NULL AS 'is_purchase'
+FROM quiz q
+LEFT JOIN home_try_on h
+   ON q.user_id = h.user_id
+LEFT JOIN purchase p
+   ON p.user_id = q.user_id
+)
+SELECT 
+number_of_pairs AS 'Variant',
+SUM(is_home_try_on) AS 'num_home_try_on',
+SUM(is_purchase) AS 'num_purchase',
+ROUND (100 * (1.0 * SUM(is_purchase) /
+SUM(is_home_try_on)),1) AS 'conversion_%'
+FROM funnel
+    WHERE number_of_pairs IS NOT NULL
+    GROUP BY 1
+;
+
+*/
+
+/*
+--looking at conversion of men's vs women's style
+
+WITH funnel AS
+ (SELECT DISTINCT q.user_id,
+   h.user_id IS NOT NULL AS 'is_home_try_on',
+   h.number_of_pairs,
+   p.user_id IS NOT NULL AS 'is_purchase'
+FROM quiz q
+LEFT JOIN home_try_on h
+   ON q.user_id = h.user_id
+LEFT JOIN purchase p
+   ON p.user_id = q.user_id
+)
+SELECT 
+style,
+SUM(is_home_try_on) AS 'num_home_try_on',
+SUM(is_purchase) AS 'num_purchase',
+ROUND (100 * (1.0 * SUM(is_purchase) /
+SUM(is_home_try_on)),1) AS 'conversion_%'
+FROM quiz q
+LEFT JOIN funnel f
+on q.user_id = f.user_id
+GROUP BY 1
+ORDER BY 4 DESC
+ ;
+
+ */
+ 
+ --looking further at conversion of style, fit, color, shape
+ /*
+ WITH funnel AS
+ (SELECT DISTINCT q.user_id,
+   h.user_id IS NOT NULL AS 'is_home_try_on',
+   h.number_of_pairs,
+   p.user_id IS NOT NULL AS 'is_purchase'
+FROM quiz q
+LEFT JOIN home_try_on h
+   ON q.user_id = h.user_id
+LEFT JOIN purchase p
+   ON p.user_id = q.user_id
+)
+SELECT
+--switch out fit/shape/style/color
+--fit,
+color,
+--style,
+--shape,
+SUM(is_home_try_on) AS 'num_home_try_on',
+SUM(is_purchase) AS 'num_purchase',
+ROUND (100 * (1.0 * SUM(is_purchase) /
+SUM(is_home_try_on)),1) AS 'conversion_%'
+FROM quiz q
+LEFT JOIN funnel f
+on q.user_id = f.user_id
+GROUP BY 1
+ORDER BY 4 DESC
+ ;
+*/
+
+--more insights...
+
+SELECT 
+q.style,
+p.model_name,
+COUNT(p.user_id) AS 'purchases'
+FROM 
+quiz q
+LEFT JOIN purchase p
+ON p.user_id = q.user_id
+GROUP BY 2
+HAVING p.model_name IS NOT NULL
+ORDER BY 3 DESC
+;
+
+
+
+
+
+
+              
